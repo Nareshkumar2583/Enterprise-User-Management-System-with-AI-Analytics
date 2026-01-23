@@ -1,0 +1,133 @@
+/* FULL PAGE CENTER */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* background: linear-gradient(135deg, #2563eb, #0ea5e9); */
+  background-image:url(../assets/pexels-pixabay-531880.jpg);
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* LOGIN CARD */
+.login-card {
+  background:white
+  width: 100%;
+  max-width: 380px;
+  padding: 35px;
+  border-radius: 14px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* TITLE */
+.login-card h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #1f2937;
+}
+
+/* INPUTS */
+.login-card input {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 15px;
+}
+
+.login-card input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* BUTTON */
+.login-card button {
+  width: 100%;
+  padding: 12px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.login-card button:hover {
+  background: #1d4ed8;
+}
+
+/* FOOTER TEXT */
+.login-footer {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 13px;
+  color: #6b7280;
+}
+/* 🔥 CARD ENTRY ANIMATION */
+@keyframes slideFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.login-card {
+  animation: slideFadeIn 0.6s ease-out forwards;
+}
+
+/* 🔥 INPUT FOCUS ANIMATION */
+.login-card input {
+  transition: border 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.login-card input:focus {
+  transform: scale(1.02);
+}
+
+/* 🔥 BUTTON INTERACTIONS */
+.login-card button {
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-card button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+}
+
+.login-card button:active {
+  transform: scale(0.98);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* 🔥 BACKGROUND ANIMATION */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.login-page {
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+}
+
+/* 🔥 FOOTER FADE-IN */
+.login-footer {
+  opacity: 0;
+  animation: fadeIn 1s ease forwards;
+  animation-delay: 0.4s;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,217 @@
+/* =========================
+   RESET
+========================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  background: #f4f6f8;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* =========================
+   DASHBOARD LAYOUT
+========================= */
+.dashboard {
+  min-height: 100vh;
+  padding: 24px;
+  background: #f4f6f8;
+}
+
+/* =========================
+   HEADER
+========================= */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: white;
+  padding: 22px 30px;
+  border-radius: 14px;
+  margin-bottom: 28px;
+}
+
+.dashboard-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.dashboard-header button {
+  background: #ef4444;
+  border: none;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.dashboard-header button:hover {
+  background: #dc2626;
+}
+
+/* =========================
+   CARD GRID
+========================= */
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+/* =========================
+   CARD BASE
+========================= */
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  min-height: 220px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+  transition: transform 0.25s ease;
+  color:black;
+  font-weight: bold;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color:black;
+  margin-bottom: 12px;
+}
+
+.card p {
+  font-size: 34px;
+  font-weight: 700;
+  color: black;
+}
+
+/* =========================
+   CARD COLOR VARIANTS
+========================= */
+.card.primary { border-left: 6px solid #2563eb; }
+.card.success { border-left: 6px solid #16a34a; }
+.card.warning { border-left: 6px solid #facc15; }
+.card.danger  { border-left: 6px solid #dc2626; }
+
+/* AI SPECIAL CARD */
+.card.ai {
+  border-left: 6px solid #8b5cf6;
+  background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+}
+
+.ai-tag {
+  display: inline-block;
+  font-size: 12px;
+  padding: 4px 8px;
+  background: #8b5cf6;
+  color: white;
+  border-radius: 6px;
+  margin-left: 6px;
+}
+
+/* =========================
+   CHART FIX
+========================= */
+.card svg, .card canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* =========================
+   USER TABLE
+========================= */
+.table-container {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+}
+
+.table-container h3 {
+  margin-bottom: 16px;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.user-table th,
+.user-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.user-table th {
+  background: #f1f5f9;
+  font-weight: 600;
+}
+
+/* =========================
+   ROLE COLORS
+========================= */
+.role-admin {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.role-user {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+.btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  margin-right: 6px;
+}
+
+.btn.promote { background: #16a34a; color: white; }
+.btn.demote  { background: #eab308; color: black; }
+.btn.delete  { background: #dc2626; color: white; }
+.btn.view    { background: #2563eb; color: white; }
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 600px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 14px;
+    text-align: center;
+  }
+
+  .card p {
+    font-size: 28px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .dashboard {
+    padding: 40px 70px;
+  }
+
+  .dashboard-header h2 {
+    font-size: 28px;
+  }
+}
