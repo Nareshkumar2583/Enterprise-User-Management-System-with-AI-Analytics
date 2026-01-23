@@ -180,8 +180,8 @@ AI model training with real datasets
 
 Add your dashboard screenshots here in GitHub:
 
-![Admin Dashboard](./screenshots/admin-dashboard.png)
-![User Dashboard](./screenshots/user-dashboard.png)
+![Admin Dashboard](./Image/admin-dashboard.png)
+![User Dashboard](./Image/user-dashboard.png)
 
 🧑‍💻 Author
 
