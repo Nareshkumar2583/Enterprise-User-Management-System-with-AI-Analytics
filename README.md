@@ -184,13 +184,5 @@ Add your dashboard screenshots here in GitHub:
 ![User Dashboard](./Image/UserDashboard.png)
 
 🧑‍💻 Author
-
 Naresh Kumar S
 Full Stack Developer | Java | React | AI-Driven Applications
-
-If you want, I can also generate:
-
-✅ Short GitHub repo description
-✅ Resume project description
-✅ Hackathon submission description
-✅ LinkedIn project post text
