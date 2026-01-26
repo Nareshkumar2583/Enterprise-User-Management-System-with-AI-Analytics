@@ -1,4 +1,4 @@
-🚀 #Enterprise AI User Management & Analytics Platform
+🚀 **Enterprise AI User Management & Analytics Platform
 
 A full-stack Enterprise-grade User Management System with AI-powered analytics, role-based access control, and predictive engagement insights.
 Built with Spring Boot, React, MongoDB, JWT Security, and AI/ML analytics.
