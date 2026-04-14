@@ -1,0 +1,45 @@
+# ML Feature Implementation Ideas for Enterprise AI Application
+
+## Category A: User Management & HR Intelligence
+1. Automated Role Recommendation & Permission Auditing
+- Context: Ensure users have proper access without manual full-time auditing.
+- Implementation: Analyze screen interactions and API usage. Recommend role downgrades/upgrades if usage doesn’t match the current role (e.g., an ADMIN acting like a normal USER).
+
+2. User Segmentation & Productivity Clustering
+- Context: Help admins understand workforce efficiency.
+- Implementation: Use K-Means clustering (`smile-core`) on `UserActivity` data to automatically group employees into segments like "Power Users", "Occasional Users", or "Struggling Users".
+
+3. Employee Burnout & Attrition Prediction
+- Context: Health and wellness monitoring for modern workforces.
+- Implementation: Flag high-risk employees by monitoring severe spikes in working hours/activity followed by a sudden decline. Alert HR inside the `AdminUserDetail` dashboard.
+
+4. Smart Resource & Task Allocation
+- Context: AI-based project management.
+- Implementation: Evaluate historical user sub-scores on the `UserPerformanceChart`. When a new project arrives, the model recommends the top 3 users best equipped to handle it.
+
+5. Behavioral Analytics (Continuous Authentication)
+- Context: Post-login security.
+- Implementation: Form a baseline for how a user navigates (click speed, specific UI paths). If a session acts erratically (potential account takeover), lock the session mid-flight.
+
+---
+
+## Category B: FinTech & General Intelligence
+6. AI-Powered Fraud Detection (Replacing the Rule Engine)
+- Context: Upgrade the `BankFlow.java` transaction playground.
+- Implementation: Build a Random Forest or Logistic Regression model to predict the statistical probability of fraud instead of relying on hardcoded `if/else` statements.
+
+7. User Login Anomaly Detection
+- Context: Pre-login security.
+- Implementation: Use Isolation Forest algorithms to detect abnormal login locations, devices, or times of day, and enforce Two-Factor Authentication dynamically.
+
+8. User Activity Forecasting & Performance Prediction
+- Context: Predictive metrics for managers.
+- Implementation: Use Time Series Forecasting (e.g., ARIMA) to draw a "Predicted Trajectory" line on a user's performance chart for the next 30 days.
+
+9. Text Analysis & Support Ticket Routing (NLP)
+- Context: Customer support automation.
+- Implementation: Route internal messages or tickets to the correct department automatically using NLP to determine intent and sentiment analysis to determine urgency.
+
+10. Churn Risk / Disengagement Prediction
+- Context: Retain users and clients.
+- Implementation: Flag users whose login frequency drops below their historical average to proactively prevent them from abandoning the platform.

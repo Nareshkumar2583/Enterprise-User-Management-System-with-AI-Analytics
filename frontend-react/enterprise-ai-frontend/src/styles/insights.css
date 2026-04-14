@@ -1,0 +1,191 @@
+.insights-page {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: #f8fafc;
+  min-height: 100%;
+}
+
+.insights-loading {
+  padding: 40px;
+  font-size: 18px;
+  color: #475569;
+}
+
+.insights-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.insights-header h2 {
+  margin: 0 0 4px 0;
+  color: #1e293b;
+  font-size: 22px;
+}
+
+.insights-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+/* KPI Cards */
+.insights-kpi-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.kpi-card {
+  flex: 1;
+  min-width: 140px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  border-top: 4px solid transparent;
+}
+
+.kpi-blue  { border-top-color: #3b82f6; }
+.kpi-green { border-top-color: #22c55e; }
+.kpi-red   { border-top-color: #ef4444; }
+.kpi-yellow{ border-top-color: #f59e0b; }
+.kpi-purple{ border-top-color: #8b5cf6; }
+.kpi-slate { border-top-color: #64748b; }
+.kpi-teal  { border-top-color: #14b8a6; }
+
+.kpi-icon  { font-size: 24px; }
+.kpi-value { font-size: 26px; font-weight: 800; color: #1e293b; }
+.kpi-label { font-size: 11px; color: #64748b; text-align: center; font-weight: 600; text-transform: uppercase; }
+
+/* Alerts */
+.alerts-list { display: flex; flex-direction: column; gap: 10px; }
+
+.alert-item {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.alert-overloaded { background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b; }
+.alert-underutilized { background: #f0fdf4; color: #166534; border-left: 4px solid #22c55e; }
+.alert-project { background: #fee2e2; color: #7f1d1d; border-left: 4px solid #ef4444; }
+.alert-skill { background: #f3e8ff; color: #5b21b6; border-left: 4px solid #8b5cf6; }
+
+/* Charts */
+.insights-charts-row {
+  display: flex;
+  gap: 20px;
+}
+
+.insights-chart-card {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+
+.insights-chart-card h3 {
+  margin: 0 0 16px 0;
+  color: #1e293b;
+  font-size: 15px;
+}
+
+/* Sections */
+.insights-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+
+.insights-section h3 {
+  margin: 0 0 16px 0;
+  color: #1e293b;
+  font-size: 15px;
+}
+
+/* Buttons */
+.ins-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.ins-btn:hover { opacity: 0.85; }
+.ins-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.ins-btn-primary   { background: #3b82f6; color: white; }
+.ins-btn-secondary { background: #f1f5f9; color: #475569; }
+.ins-btn-warn      { background: #fef3c7; color: #92400e; font-size: 11px; padding: 5px 10px; }
+
+/* Status Badges */
+.status-badge {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-overloaded    { background: #fee2e2; color: #ef4444; }
+.status-optimal       { background: #dcfce7; color: #16a34a; }
+.status-underutilized { background: #f1f5f9; color: #64748b; }
+
+/* Progress Bar */
+.progress-wrapper {
+  background: #e2e8f0;
+  border-radius: 4px;
+  height: 6px;
+  width: 100px;
+  margin-bottom: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s;
+}
+
+/* Skill Gaps */
+.skill-gaps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skill-gap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: #faf5ff;
+  border-radius: 8px;
+  border: 1px solid #e9d5ff;
+}
+
+.skill-icon { font-size: 20px; }
+
+/* Reallocation result */
+.realloc-result {
+  padding: 14px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.realloc-success { background: #dcfce7; color: #166534; }
+.realloc-none    { background: #f1f5f9; color: #475569; }

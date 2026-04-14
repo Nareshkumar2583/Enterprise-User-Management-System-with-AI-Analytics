@@ -1,0 +1,90 @@
+/* =========================
+   ML FEATURE STYLES 
+========================= */
+
+/* Alert Marquee / Banner */
+.alert-banner {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+  font-weight: 600;
+  animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ML Tag Pills */
+.ml-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pill-high { background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; }
+.pill-med { background: #fef9c3; color: #eab308; border: 1px solid #fde047; }
+.pill-low { background: #dcfce7; color: #22c55e; border: 1px solid #86efac; }
+
+/* Segment Tag */
+.segment-tag {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+}
+
+/* Churn Bar */
+.churn-wrapper {
+  background: #e2e8f0;
+  border-radius: 6px;
+  height: 10px;
+  width: 100%;
+  max-width: 120px;
+  overflow: hidden;
+  position: relative;
+}
+
+.churn-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease-in-out;
+}
+
+.churn-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Animated Suspicious Alert on Table */
+.alert-row {
+  background: #fff1f2 !important;
+  border-left: 4px solid #ef4444;
+}
+
+.pulsing-alert {
+  display: inline-block;
+  animation: pulseAlert 1.5s infinite;
+}
+
+@keyframes pulseAlert {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}

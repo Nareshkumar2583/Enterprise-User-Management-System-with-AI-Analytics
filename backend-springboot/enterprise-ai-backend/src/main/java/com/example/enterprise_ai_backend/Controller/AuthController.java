@@ -2,6 +2,7 @@ package com.example.enterprise_ai_backend.Controller;
 
 import com.example.enterprise_ai_backend.Service.UserActivityService;
 import com.example.enterprise_ai_backend.Service.UserService;
+import com.example.enterprise_ai_backend.Service.EmailService;
 import com.example.enterprise_ai_backend.dto.Login;
 import com.example.enterprise_ai_backend.dto.LoginResponse;
 import com.example.enterprise_ai_backend.model.User;
@@ -18,15 +19,18 @@ public class AuthController {
     private final UserService service;
     private final JwtUtil jwtUtil;
     private final UserActivityService activityService;
+    private final EmailService emailService;
 
     public AuthController(
             UserService service,
             JwtUtil jwtUtil,
-            UserActivityService activityService
+            UserActivityService activityService,
+            EmailService emailService
     ) {
         this.service = service;
         this.jwtUtil = jwtUtil;
         this.activityService = activityService;
+        this.emailService = emailService;
     }
 
     @PostMapping("/register")
@@ -38,6 +42,19 @@ public class AuthController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/test-mail")
+    public ResponseEntity<?> testLiveEmail() {
+        emailService.sendTaskAllocationEmail(
+            "nareshkumarsitdept@gmail.com", 
+            "Live Inbox Verification by Enterprise AI Agent", 
+            "CRITICAL", 
+            "RIGHT NOW", 
+            "dekiru0076@gmail.com (ADMIN)", 
+            null
+        );
+        return ResponseEntity.ok("Email Triggered Natively to nareshkumarsitdept@gmail.com!");
     }
 
     @PostMapping("/login")
@@ -56,7 +73,7 @@ public class AuthController {
             );
 
             return ResponseEntity.ok(
-                    new LoginResponse(token, user.getEmail(), user.getRole())
+                    new LoginResponse(token, user.getId(), user.getName(), user.getEmail(), user.getRole())
             );
 
         } catch (RuntimeException e) {

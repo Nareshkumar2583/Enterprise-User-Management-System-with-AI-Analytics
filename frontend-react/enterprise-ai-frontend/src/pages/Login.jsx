@@ -1,5 +1,5 @@
 import { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
 import { AuthContext } from "../auth/AuthContext";
 import "../styles/login.css";   // ✅ ADD THIS
@@ -48,6 +48,10 @@ export default function Login() {
         />
 
         <button type="submit">Login</button>
+
+        <div style={{ marginTop: "16px", textAlign: "center", fontSize: "14px" }}>
+          Don't have an account? <Link to="/register" style={{ color: "#3b82f6", textDecoration: "none" }}>Sign up here</Link>
+        </div>
 
         <div className="login-footer">
           Enterprise AI Analytics System

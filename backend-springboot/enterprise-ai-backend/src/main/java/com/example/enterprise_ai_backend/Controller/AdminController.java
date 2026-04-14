@@ -33,6 +33,12 @@ public class AdminController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    // ✅ GET SINGLE USER
+    @GetMapping("/users/{id}")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable String id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
     // ✅ DELETE USER
     @DeleteMapping("/users/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable String id) {
@@ -70,5 +76,19 @@ public class AdminController {
     @GetMapping("/analytics")
     public Map<String, Object> getAnalytics() {
         return analyticsService.buildAnalytics();
+    }
+
+    // 🚫 BLOCK USER
+    @PutMapping("/users/{id}/block")
+    public ResponseEntity<String> blockUser(@PathVariable String id) {
+        userService.blockUser(id, true);
+        return ResponseEntity.ok("User account suspended.");
+    }
+
+    // ✅ UNBLOCK USER
+    @PutMapping("/users/{id}/unblock")
+    public ResponseEntity<String> unblockUser(@PathVariable String id) {
+        userService.blockUser(id, false);
+        return ResponseEntity.ok("User account restored.");
     }
 }

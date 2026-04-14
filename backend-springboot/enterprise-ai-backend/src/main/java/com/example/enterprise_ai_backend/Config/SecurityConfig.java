@@ -35,13 +35,23 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        // Document uploads/downloads — authenticated users only
+                        .requestMatchers("/api/documents/**").authenticated()
+
+                        // Notifications — authenticated users only
+                        .requestMatchers("/api/notifications/**").authenticated()
+
                         // Admin only
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // User only
-                        .requestMatchers("/api/user/**").hasRole("USER")
+                        // User endpoints — accessible by both USER and ADMIN
+                        .requestMatchers("/api/user/**").authenticated()
 
-                        // Everything else needs authentication
+                        // Tasks and audit — any authenticated user
+                        .requestMatchers("/api/tasks/**").authenticated()
+                        .requestMatchers("/api/audit/**").authenticated()
+
+                        // Everything else
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

@@ -25,5 +25,15 @@ public class UserController {
     public List<UserResponse> getUsers() {
         return service.getAllUsers();
     }
+
+    @GetMapping("/{id}")
+    public UserResponse getUser(@PathVariable String id) {
+        return service.getUserById(id);
+    }
+
+    @PutMapping("/{id}/profile")
+    public User updateProfile(@PathVariable String id, @RequestBody User user) {
+        return service.updateProfile(id, user);
+    }
 }
 
