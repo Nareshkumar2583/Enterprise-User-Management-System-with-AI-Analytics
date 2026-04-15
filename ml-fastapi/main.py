@@ -6,6 +6,7 @@ import joblib
 import pandas as pd
 import numpy as np
 import os
+import random 
 
 app = FastAPI(title="Enterprise AI - ML Microservice")
 
