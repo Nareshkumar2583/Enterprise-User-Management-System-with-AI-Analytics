@@ -1,121 +1,126 @@
-🚀 **Enterprise AI User Management & Analytics Platform**
+# 🚀 Enterprise User Management System with AI Analytics
 
-A full-stack Enterprise-grade User Management System with AI-powered analytics, role-based access control, and predictive engagement insights.
-Built with Spring Boot, React, MongoDB, JWT Security, and AI/ML analytics.
+## 📌 Project Overview
+The Enterprise User Management System with AI Analytics is a full-stack web application designed to manage users, tasks, and support tickets within an organization. It integrates Artificial Intelligence to provide smart insights such as risk detection, anomaly detection, burnout analysis, and predictive project insights.
 
-🧠 **Project Overview**
-This project is designed to simulate a real-world enterprise SaaS platform where:
-- Admins manage users & monitor system health
-- Users view personalized dashboards
-- AI predicts engagement, retention, and risk
-- Role-based security controls access
+This system helps organizations improve productivity, automate workflows, and enhance decision-making.
 
-Data is visualized with interactive charts
+---
 
-This makes the project unique, scalable, and interview-ready.
+## 🎯 Problem Statement
+In many organizations, managing users, assigning tasks, and handling support requests is difficult and time-consuming. Traditional systems lack intelligent insights, which leads to delays, poor workload distribution, and reduced efficiency.
 
-🔐 **Authentication & Security**
+---
 
-- JWT-based authentication
-- Role-based access (ADMIN / USER)
-- Spring Security filter chain
-- Secure API access control
+## 🚀 Solution
+This system provides a centralized platform where:
+- Admins manage users and tasks  
+- Users track work and raise issues  
+- AI automates decisions and provides insights  
 
-🧑‍💼 **Admin Dashboard**
+---
 
-Admins can:
-- View total users, admins, active users
-- See role distribution (Pie Chart)
-- Monitor login activity (Bar Chart)
-Promote / Demote users
-- Delete users
-- View individual user details
-- View AI Engagement Score
-- Monitor platform health
+## 🌟 Key Features
 
-👤 **User Dashboard**
+### 👤 User Features
+- Secure login and authentication (JWT)
+- Personal dashboard with task overview
+- Kanban board (To Do → In Progress → Done)
+- Time tracking (stopwatch)
+- Raise and track support tickets
+- Notifications and progress updates
+- Performance insights
 
-Users can:
-- View profile info (email, role, status)
-- See AI Engagement Score
-- View AI Risk Level (LOW / MEDIUM / HIGH)
-- See Retention Probability
-- Get AI Recommendations
-- Track performance overview
+---
 
-🤖 **AI & Predictive Analytics**
+### 🧑‍💼 Admin Features
+- User management (Add, Update, Delete)
+- Role-based access control
+- Task assignment and monitoring
+- Smart ticket management system
+- Organization analytics dashboard
+- Audit logs tracking
+- Alerts for suspicious activity
 
-AI logic provides:
-- Engagement Score prediction
-- User Risk Level prediction
-- Retention Probability (churn risk)
-- AI-generated recommendations
-These are calculated on the backend and displayed in real-time on the frontend.
+---
 
-🛠 **Tech Stack**
-**Backend**
-- Java 17
-- Spring Boot 3
-- Spring Security
-- JWT Authentication
-- MongoDB
-- Smile ML Library (AI/Analytics)
+### 🤖 AI Features
+- AI-based ticket classification and routing
+- Risk prediction based on user behavior
+- Anomaly detection for security
+- Burnout detection using workload analysis
+- Predictive project insights (delay prediction)
+- AI assistant for quick system queries
+
+---
+
+## 🧱 Tech Stack
+
+### Frontend
+- React.js
+- HTML, CSS, JavaScript
+
+### Backend
+- Node.js / Spring Boot
 - REST APIs
 
-**Frontend**
-React + Vite
--Axios
--Recharts (Charts)
--Context API (Auth)
--Modern responsive UI
--CSS Grid & Flexbox
+### AI/ML
+- FastAPI
+- scikit-learn
+- River (online learning)
 
-📊 **Dashboards Preview**
-- Admin Dashboard
-- User statistics cards
-- Role distribution pie chart
-- User activity bar chart
-- AI Engagement insights
-- User management table
-- User Dashboard
-- Profile summary cards
-- AI Engagement Score
-- AI Risk Level
-  
+### Database
+- MongoDB
 
-🔄 **API Highlights**
-Auth
-- POST /api/auth/register
-- POST /api/auth/login
+### Authentication
+- JWT (JSON Web Token)
 
-Admin
-- GET /api/admin/users
-- PUT /api/admin/users/{id}/promote
-- DELETE /api/admin/users/{id}
-- GET /api/admin/analytics
+---
 
-User AI
-- GET /api/user/risk-analysis
-- GET /api/user/analytics
-- 
-🎯 **Why This Project is Unique**
-✅ Combines Enterprise User Management + AI Analytics
-✅ Real JWT security (not mock auth)
-✅ Predictive AI features (risk + retention)
-✅ Clean dashboards for Admin & User
-✅ Production-style architecture
-✅ Great for interviews, hackathons & portfolio
 
-🚀 **uture Enhancements**
-- Real-time WebSocket updates
-- Email alerts for high-risk users
-- Admin AI recommendations
-- User activity heatmaps
-- Audit logs & compliance tracking
+## 📂 Project Structure
+```
+frontend/
+backend/
+ml-service/
+```
 
-**AI model training with real datasets**
-📸 Screenshots
-Add your dashboard screenshots here in GitHub:
+---
+
+# ▶️ How to Run the Project
+
+## 🔹 1. Clone Repository
+```bash
+git clone https://github.com/Nareshkumar2583/Enterprise-User-Management-System-with-AI-Analytics.git
+cd Enterprise-User-Management-System-with-AI-Analytics
+```
+⚙️ 2. Run Backend
+```
+cd backend
+npm install
+npm start
+```
+👉 Backend runs at: http://localhost:5000
+
+🤖 3. Run ML Service
+```
+cd ml-service
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+👉 ML service runs at: http://localhost:8000
+
+🎨 4. Run Frontend
+```
+cd frontend
+npm install
+npm start
+```
+
+👉 Frontend runs at: http://localhost:3000
+
+---
 
 ![Admin Dashboard](./Image/AdminDashboard.png)
 ![User Dashboard](./Image/UserDashboard.png)
