@@ -154,3 +154,38 @@
 }
 .chat-input-row button:hover:not(:disabled) { opacity: 0.85; }
 .chat-input-row button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* =============================
+   RESPONSIVE — MOBILE (≤768px)
+============================= */
+@media (max-width: 768px) {
+  .ai-assistant-page {
+    padding: 16px;
+    height: calc(100vh - 56px);
+    gap: 10px;
+  }
+
+  .chat-bubble {
+    max-width: 95%;
+  }
+
+  .chat-input-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .chat-input-row button {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .chat-suggestions {
+    gap: 6px;
+  }
+
+  .suggestion-chip {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+}
+

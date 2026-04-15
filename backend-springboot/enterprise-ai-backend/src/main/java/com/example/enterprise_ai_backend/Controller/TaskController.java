@@ -9,7 +9,6 @@ import com.example.enterprise_ai_backend.repository.TaskRepository;
 import com.example.enterprise_ai_backend.repository.NotificationRepository;
 import com.example.enterprise_ai_backend.repository.Userrepository;
 import com.example.enterprise_ai_backend.Service.EmailService;
-import com.example.enterprise_ai_backend.Service.EmailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -233,4 +232,55 @@ public class TaskController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    @PutMapping("/{id}/assignee")
+    public ResponseEntity<?> updateTaskAssignee(@PathVariable String id, @RequestBody Map<String, String> body, Authentication auth) {
+        Optional<Task> opt = taskRepo.findById(id);
+        if (opt.isPresent()) {
+            Task task = opt.get();
+            String newId = body.get("assigneeId");
+            String newEmail = body.get("assigneeEmail");
+            String oldId = task.getAssigneeId();
+
+            task.setAssigneeId(newId);
+            task.setAssigneeEmail(newEmail);
+            taskRepo.save(task);
+
+            String actor = (auth != null) ? auth.getName() : "Admin";
+            logAudit(actor, newId, "TASK_ASSIGNED_MANUAL", "Manually assigned task '" + task.getTitle() + "' to " + newEmail);
+
+            if (newId != null && !newId.equals(oldId)) {
+                Notification n = notifRepo.save(new Notification(newId, "New task assigned: " + task.getTitle(), "INFO"));
+                
+                String emailToUse = newEmail;
+                if (emailToUse == null || emailToUse.isEmpty()) {
+                    emailToUse = userRepo.findById(newId).map(User::getEmail).orElse(null);
+                }
+                
+                if (emailToUse != null) {
+                    emailService.sendTaskAllocationEmail(emailToUse, task.getTitle(), task.getPriority(), task.getDueDate(), actor, n.getId());
+                } else {
+                    System.err.println("⚠️ Could not find email for assignee " + newId + ". Notification preserved in app but email not sent.");
+                }
+            }
+            return ResponseEntity.ok(task);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteTask(@PathVariable String id, Authentication auth) {
+        Optional<Task> opt = taskRepo.findById(id);
+        if (opt.isPresent()) {
+            Task task = opt.get();
+            taskRepo.deleteById(id);
+            
+            String actor = (auth != null) ? auth.getName() : "Admin";
+            logAudit(actor, id, "TASK_DELETED", "Deleted task: '" + task.getTitle() + "'");
+            
+            return ResponseEntity.ok(Map.of("message", "Task deleted successfully"));
+        }
+        return ResponseEntity.notFound().build();
+    }
 }
+

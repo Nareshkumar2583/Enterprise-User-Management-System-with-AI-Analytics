@@ -1,8 +1,10 @@
 package com.example.enterprise_ai_backend.Controller;
 
-import com.example.enterprise_ai_backend.Service.UserActivityService;
 import com.example.enterprise_ai_backend.Service.UserService;
 import com.example.enterprise_ai_backend.Service.EmailService;
+import com.example.enterprise_ai_backend.Service.UserActivityService;
+import com.example.enterprise_ai_backend.model.Notification;
+import com.example.enterprise_ai_backend.repository.NotificationRepository;
 import com.example.enterprise_ai_backend.dto.Login;
 import com.example.enterprise_ai_backend.dto.LoginResponse;
 import com.example.enterprise_ai_backend.model.User;
@@ -20,17 +22,20 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final UserActivityService activityService;
     private final EmailService emailService;
+    private final NotificationRepository notifRepo;
 
     public AuthController(
             UserService service,
             JwtUtil jwtUtil,
             UserActivityService activityService,
-            EmailService emailService
+            EmailService emailService,
+            NotificationRepository notifRepo
     ) {
         this.service = service;
         this.jwtUtil = jwtUtil;
         this.activityService = activityService;
         this.emailService = emailService;
+        this.notifRepo = notifRepo;
     }
 
     @PostMapping("/register")
@@ -38,6 +43,13 @@ public class AuthController {
         try {
             User saved = service.register(user);
             activityService.log(saved.getEmail(), "Account Registered");
+            
+            // In-app Welcome
+            notifRepo.save(new Notification(saved.getId(), "Welcome to Enterprise AI! We're glad you're here.", "INFO"));
+            
+            // Email Welcome
+            emailService.sendWelcomeEmail(saved);
+            
             return ResponseEntity.ok(saved);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -66,6 +78,9 @@ public class AuthController {
             );
 
             activityService.log(user.getEmail(), "Logged in");
+
+            // Stamp last active date for HR Intelligence
+            service.stampLastActive(user.getId());
 
             String token = jwtUtil.generateToken(
                     user.getEmail(),

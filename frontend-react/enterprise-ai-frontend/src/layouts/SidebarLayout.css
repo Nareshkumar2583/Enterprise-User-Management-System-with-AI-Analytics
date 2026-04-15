@@ -1,3 +1,6 @@
+/* =============================
+   LAYOUT CONTAINER
+============================= */
 .layout-container {
   display: flex;
   height: 100vh;
@@ -6,14 +9,19 @@
   background-color: #f8fafc;
 }
 
+/* =============================
+   SIDEBAR
+============================= */
 .sidebar {
   width: 250px;
+  min-width: 250px;
   background-color: #1e293b;
   color: #fff;
   display: flex;
   flex-direction: column;
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  z-index: 200;
+  transition: transform 0.3s ease;
 }
 
 .sidebar-header {
@@ -38,11 +46,13 @@
   border-radius: 20px;
   color: #cbd5e1;
   font-weight: bold;
+  word-break: break-all;
 }
 
 .dot {
   width: 8px;
   height: 8px;
+  min-width: 8px;
   background: #22c55e;
   border-radius: 50%;
   display: inline-block;
@@ -71,6 +81,7 @@
   cursor: pointer;
   text-align: left;
   transition: all 0.2s;
+  width: 100%;
 }
 
 .nav-item:hover {
@@ -103,8 +114,131 @@
   color: #b91c1c;
 }
 
+/* =============================
+   MAIN CONTENT
+============================= */
 .main-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
+  min-width: 0;
+}
+
+/* =============================
+   HAMBURGER (hidden on desktop)
+============================= */
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 38px;
+  height: 38px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 6px;
+  transition: background 0.2s;
+}
+
+.hamburger-btn:hover {
+  background: #e2e8f0;
+}
+
+.hamburger-line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #1e293b;
+  border-radius: 2px;
+}
+
+/* =============================
+   MOBILE APP TITLE (hidden on desktop)
+============================= */
+.mobile-app-title {
+  display: none;
+  font-size: 16px;
+  color: #1e293b;
+  letter-spacing: -0.3px;
+}
+
+/* =============================
+   MOBILE OVERLAY
+============================= */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 199;
+  backdrop-filter: blur(2px);
+}
+
+/* =============================
+   RESPONSIVE — MOBILE (≤768px)
+============================= */
+@media (max-width: 768px) {
+  /* Show overlay when sidebar is open */
+  .sidebar-overlay {
+    display: block;
+  }
+
+  /* Show hamburger & title */
+  .hamburger-btn {
+    display: flex;
+  }
+  .mobile-app-title {
+    display: inline;
+  }
+
+  /* Sidebar slides in from left */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+  }
+
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+    box-shadow: 6px 0 24px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Main takes full width */
+  .main-content {
+    width: 100%;
+  }
+
+  /* Compact sidebar header on mobile */
+  .sidebar-header {
+    padding: 16px;
+  }
+
+  .user-badge {
+    font-size: 10px;
+  }
+}
+
+/* =============================
+   RESPONSIVE — TABLET (769px–1024px)
+============================= */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar {
+    width: 200px;
+    min-width: 200px;
+  }
+
+  .nav-item {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  .title {
+    font-size: 17px;
+  }
 }

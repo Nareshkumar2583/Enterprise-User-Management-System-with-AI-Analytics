@@ -3,7 +3,9 @@ package com.example.enterprise_ai_backend.Controller;
 import com.example.enterprise_ai_backend.Service.AdminAnalyticsService;
 import com.example.enterprise_ai_backend.Service.UserService;
 import com.example.enterprise_ai_backend.dto.UserResponse;
+import com.example.enterprise_ai_backend.model.SupportTicket;
 import com.example.enterprise_ai_backend.repository.LoginActivityRepository;
+import com.example.enterprise_ai_backend.repository.SupportTicketRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,12 +20,16 @@ public class AdminController {
 
     private final UserService userService;
     private final LoginActivityRepository activityRepo;
+    private final SupportTicketRepository ticketRepo;
     private final AdminAnalyticsService analyticsService;
 
     public AdminController(UserService userService,
-                           LoginActivityRepository activityRepo,AdminAnalyticsService analyticsService) {
+                           LoginActivityRepository activityRepo, 
+                           SupportTicketRepository ticketRepo,
+                           AdminAnalyticsService analyticsService) {
         this.userService = userService;
         this.activityRepo = activityRepo;
+        this.ticketRepo = ticketRepo;
         this.analyticsService=analyticsService;
     }
 
@@ -76,6 +82,12 @@ public class AdminController {
     @GetMapping("/analytics")
     public Map<String, Object> getAnalytics() {
         return analyticsService.buildAnalytics();
+    }
+
+    // ✅ GET ALL SUPPORT TICKETS
+    @GetMapping("/tickets")
+    public List<SupportTicket> getAllTickets() {
+        return ticketRepo.findAllByOrderByCreatedAtDesc();
     }
 
     // 🚫 BLOCK USER

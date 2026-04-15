@@ -99,6 +99,14 @@ export default function AdminHRIntelligence() {
                   <span style={{ fontSize: "14px", fontWeight: "bold", color: riskColor[u.churnRisk] }}>
                     {Math.round(u.churnScore * 100)}%
                   </span>
+                  <span style={{
+                    fontSize: "11px", padding: "3px 8px", borderRadius: "10px",
+                    background: u.daysSinceLogin >= 14 ? "#fee2e2" : u.daysSinceLogin >= 7 ? "#fef3c7" : "#d1fae5",
+                    color: u.daysSinceLogin >= 14 ? "#dc2626" : u.daysSinceLogin >= 7 ? "#b45309" : "#065f46",
+                    fontWeight: "600"
+                  }}>
+                    {u.daysSinceLogin === 0 ? "Active today" : u.daysSinceLogin === 1 ? "1 day ago" : `${u.daysSinceLogin}d inactive`}
+                  </span>
                 </div>
               </div>
 
@@ -108,13 +116,23 @@ export default function AdminHRIntelligence() {
                 </div>
               )}
 
-              <div style={{ marginTop: "10px", display: "flex", gap: "16px", flexWrap: "wrap" }}>
+              <div style={{ marginTop: "10px", display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center" }}>
                 <div style={{ fontSize: "12px", color: "#64748b" }}>
                   <strong style={{ color: "#374151" }}>Primary Signal:</strong> {u.primaryReason}
                 </div>
                 <div style={{ fontSize: "12px", color: "#64748b" }}>
-                  <strong style={{ color: "#374151" }}>Recommended Action:</strong> {u.recommendation}
+                  <strong style={{ color: "#374151" }}>Action:</strong> {u.recommendation}
                 </div>
+                {u.burnoutRisk && u.burnoutRisk !== "LOW" && (
+                  <span style={{
+                    fontSize: "11px", padding: "3px 10px", borderRadius: "10px", fontWeight: "700",
+                    background: u.burnoutRisk === "HIGH" ? "#fff1f2" : "#fff7ed",
+                    color: u.burnoutRisk === "HIGH" ? "#be123c" : "#c2410c",
+                    border: `1px solid ${u.burnoutRisk === "HIGH" ? "#fda4af" : "#fed7aa"}`
+                  }}>
+                    🔥 Burnout: {u.burnoutRisk} ({u.activeTasks || 0} active tasks{u.criticalTasks > 0 ? `, ${u.criticalTasks} CRITICAL` : ""})
+                  </span>
+                )}
               </div>
 
               {/* Score bar */}

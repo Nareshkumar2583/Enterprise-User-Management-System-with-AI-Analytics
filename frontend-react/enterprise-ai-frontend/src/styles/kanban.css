@@ -138,6 +138,28 @@
   font-weight: 600;
 }
 
+.task-delete-btn {
+  background: transparent;
+  border: 1px solid #fecaca;
+  color: #ef4444;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.6;
+}
+
+.task-delete-btn:hover {
+  background: #ef4444;
+  color: white;
+  opacity: 1;
+}
+
 .task-assignee {
   font-size: 11px;
   color: #64748b;
@@ -156,3 +178,39 @@
   border-radius: 4px;
   line-height: 1.4;
 }
+
+/* =============================
+   RESPONSIVE — MOBILE (≤768px)
+============================= */
+@media (max-width: 768px) {
+  .kanban-page {
+    padding: 16px;
+  }
+
+  .kanban-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .task-form {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .task-form input[type="text"] {
+    width: 100%;
+  }
+
+  .kanban-board {
+    gap: 12px;
+    /* horizontal scroll on mobile so columns stay full-width */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kanban-column {
+    min-width: 260px;
+  }
+}
+

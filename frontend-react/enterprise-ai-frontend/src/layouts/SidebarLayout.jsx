@@ -10,6 +10,7 @@ export default function SidebarLayout() {
   const location = useLocation();
   const [notifications, setNotifications] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -41,11 +42,13 @@ export default function SidebarLayout() {
     { label: "Overview", path: "/admin", icon: "📊" },
     { label: "Org Analytics", path: "/admin/org-analytics", icon: "🏢" },
     { label: "AI Scrum Board", path: "/admin/kanban", icon: "🍱" },
+    { label: "Scrum Hub", path: "/admin/scrum", icon: "🏃" },
     { label: "Project Intelligence", path: "/admin/project-intelligence", icon: "🔮" },
     { label: "Role Intelligence", path: "/admin/insights", icon: "🧠" },
     { label: "HR Intelligence", path: "/admin/hr-intelligence", icon: "👥" },
     { label: "AI Assistant", path: "/admin/ai-assistant", icon: "🤖" },
     { label: "Approvals", path: "/admin/approvals", icon: "📋" },
+    { label: "Smart Tickets", path: "/admin/tickets", icon: "🎫" },
     { label: "Leave & Availability", path: "/admin/leave", icon: "📅" },
     { label: "Audit Logs", path: "/admin/audit", icon: "🛡️" }
   ];
@@ -54,6 +57,7 @@ export default function SidebarLayout() {
     { label: "My Dashboard", path: "/user", icon: "👤" },
     { label: "My Profile", path: "/user/profile", icon: "⚙️" },
     { label: "My Tasks", path: "/user/kanban", icon: "📝" },
+    { label: "My Sprint", path: "/user/sprint", icon: "🏃" },
     { label: "AI Assistant", path: "/user/ai-assistant", icon: "🤖" },
     { label: "Daily Planner", path: "/user/daily-planner", icon: "🗓️" },
     { label: "Growth Insights", path: "/user/growth", icon: "📈" },
@@ -68,8 +72,11 @@ export default function SidebarLayout() {
 
   return (
     <div className="layout-container">
+      {/* Mobile overlay */}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+
       {/* Sidebar */}
-      <div className="sidebar">
+      <div className={`sidebar${sidebarOpen ? " sidebar-open" : ""}`}>
         <div className="sidebar-header">
           <h2 className="title">
             Enterprise <span style={{ color: "#3b82f6" }}>AI</span>
@@ -85,7 +92,7 @@ export default function SidebarLayout() {
             <button
               key={item.path}
               className={`nav-item ${location.pathname === item.path ? "active" : ""}`}
-              onClick={() => navigate(item.path)}
+              onClick={() => { navigate(item.path); setSidebarOpen(false); }}
             >
               <span className="nav-icon">{item.icon}</span>
               {item.label}
@@ -104,7 +111,20 @@ export default function SidebarLayout() {
       {/* Main Content Area */}
       <div className="main-content">
         {/* Top Header Row */}
-        <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "16px", padding: "10px 20px", background: "#ffffff", borderBottom: "1px solid #e2e8f0", zIndex: 5, position: "relative" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px", padding: "10px 20px", background: "#ffffff", borderBottom: "1px solid #e2e8f0", zIndex: 5, position: "relative" }}>
+          {/* Hamburger (mobile only) + App title */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <button
+              className="hamburger-btn"
+              onClick={() => setSidebarOpen(prev => !prev)}
+              aria-label="Toggle menu"
+            >
+              <span className="hamburger-line" />
+              <span className="hamburger-line" />
+              <span className="hamburger-line" />
+            </button>
+            <span className="mobile-app-title">Enterprise <strong>AI</strong></span>
+          </div>
           
           <div style={{ position: "relative" }}>
             <button 
@@ -120,7 +140,7 @@ export default function SidebarLayout() {
             </button>
             
             {showDropdown && (
-              <div style={{ position: "absolute", right: 0, top: "35px", width: "300px", background: "white", border: "1px solid #cbd5e1", borderRadius: "8px", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)", zIndex: 50, padding: "12px" }}>
+              <div style={{ position: "absolute", right: 0, top: "35px", width: "min(300px, calc(100vw - 32px))", background: "white", border: "1px solid #cbd5e1", borderRadius: "8px", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)", zIndex: 50, padding: "12px" }}>
                 <h4 style={{ margin: "0 0 10px 0", fontSize: "14px", borderBottom: "1px solid #e2e8f0", paddingBottom: "8px", color: "#1e293b" }}>Alerts & Notifications</h4>
                 {notifications.length === 0 ? (
                   <p style={{ fontSize: "12px", color: "#64748b", margin: 0 }}>You are all caught up!</p>

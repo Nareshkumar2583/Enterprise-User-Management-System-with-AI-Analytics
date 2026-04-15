@@ -191,18 +191,57 @@ html, body, #root {
 .btn.delete  { background: #dc2626; color: white; }
 .btn.view    { background: #2563eb; color: white; }
 
-/* =========================
-   RESPONSIVE
-========================= */
-@media (max-width: 600px) {
+/* =============================
+   RESPONSIVE — MOBILE (≤768px)
+============================= */
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 16px;
+  }
+
   .dashboard-header {
     flex-direction: column;
     gap: 14px;
     text-align: center;
+    padding: 16px;
+  }
+
+  .dashboard-header h2 {
+    font-size: 18px;
   }
 
   .card p {
     font-size: 28px;
+  }
+
+  .card-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* Make table scroll horizontally on mobile */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .user-table th,
+  .user-table td {
+    font-size: 13px;
+    padding: 10px 12px;
+    white-space: nowrap;
+  }
+
+  .btn {
+    font-size: 11px;
+    padding: 5px 8px;
+    margin-right: 4px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1100px) {
+  .card-container {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -215,3 +254,4 @@ html, body, #root {
     font-size: 28px;
   }
 }
+

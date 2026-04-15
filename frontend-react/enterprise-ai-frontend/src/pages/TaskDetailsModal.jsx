@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
+import { AuthContext } from "../auth/AuthContext";
 import api from "../api/axios";
 
-export default function TaskDetailsModal({ task, onClose, onUpdate }) {
+export default function TaskDetailsModal({ task, onClose, onUpdate, onDelete }) {
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState(task.comments || []);
   const [timeSpent, setTimeSpent] = useState(task.timeSpentSeconds || 0);
@@ -9,6 +10,11 @@ export default function TaskDetailsModal({ task, onClose, onUpdate }) {
   const [uploading, setUploading] = useState(false);
   const [aiSummary, setAiSummary] = useState(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
+  
+  const { user: currentUser } = useContext(AuthContext);
+  const isAdmin = currentUser?.role === "ADMIN";
+  const [users, setUsers] = useState([]);
+  const [isUpdatingAssignee, setIsUpdatingAssignee] = useState(false);
   
   // WAVE 8: Decision Support
   const [decisionSupport, setDecisionSupport] = useState(null);
@@ -23,10 +29,15 @@ export default function TaskDetailsModal({ task, onClose, onUpdate }) {
   }, [onClose]);
 
   useEffect(() => {
+    if (isAdmin) {
+      api.get("/api/admin/users")
+        .then(res => setUsers(res.data))
+        .catch(err => console.error("Error fetching users", err));
+    }
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [isAdmin]);
 
   const handleAddComment = async (e) => {
     e.preventDefault();
@@ -115,6 +126,25 @@ export default function TaskDetailsModal({ task, onClose, onUpdate }) {
     }
   };
 
+  const handleAssigneeChange = async (userId) => {
+    const selectedUser = users.find(u => u.id === userId);
+    if (!selectedUser) return;
+    
+    setIsUpdatingAssignee(true);
+    try {
+      const res = await api.put(`/api/tasks/${task.id}/assignee`, {
+        assigneeId: selectedUser.id,
+        assigneeEmail: selectedUser.email
+      });
+      onUpdate(res.data);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update assignee");
+    } finally {
+      setIsUpdatingAssignee(false);
+    }
+  };
+
   const toggleTimer = () => {
     if (isTimerRunning) {
       // Stop timer and save to server
@@ -155,14 +185,41 @@ export default function TaskDetailsModal({ task, onClose, onUpdate }) {
             </span>
             <h2 style={{ margin: 0, fontSize: "20px", color: "#1e293b", lineHeight: 1.3 }}>{task.title}</h2>
           </div>
-          <button onClick={onClose} style={{ background: "transparent", border: "none", fontSize: "24px", color: "#94a3b8", cursor: "pointer" }}>×</button>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {isAdmin && (
+              <button 
+                onClick={() => onDelete(task.id)}
+                style={{ background: "#fee2e2", color: "#ef4444", border: "1px solid #fecaca", padding: "6px 12px", borderRadius: "8px", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}
+              >
+                🗑️ Delete Task
+              </button>
+            )}
+            <button onClick={onClose} style={{ background: "transparent", border: "none", fontSize: "24px", color: "#94a3b8", cursor: "pointer" }}>×</button>
+          </div>
         </div>
 
         {/* Scrollable Content */}
         <div style={{ padding: "24px", flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "24px" }}>
           
           <div style={{ fontSize: "14px", color: "#475569", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div><strong>Assignee:</strong> {task.assigneeEmail || "Unassigned"}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <strong>Assignee:</strong> 
+              {isAdmin ? (
+                <select 
+                  value={task.assigneeId || ""} 
+                  onChange={(e) => handleAssigneeChange(e.target.value)}
+                  disabled={isUpdatingAssignee}
+                  style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "13px" }}
+                >
+                  <option value="">Unassigned</option>
+                  {users.map(u => (
+                    <option key={u.id} value={u.id}>{u.name || u.email}</option>
+                  ))}
+                </select>
+              ) : (
+                <span>{task.assigneeEmail || "Unassigned"}</span>
+              )}
+            </div>
             
             <button 
               onClick={generateDecisionSupport}

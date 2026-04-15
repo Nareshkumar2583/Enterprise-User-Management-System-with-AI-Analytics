@@ -1,6 +1,7 @@
 package com.example.enterprise_ai_backend.Controller;
 
 import com.example.enterprise_ai_backend.Service.AdminAnalyticsService;
+import com.example.enterprise_ai_backend.repository.TaskRepository;
 import com.example.enterprise_ai_backend.repository.Userrepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,15 +18,17 @@ public class AdminAnalyticsController {
     private final AdminAnalyticsService analyticsService;
     private final RestTemplate restTemplate;
     private final Userrepository userRepo;
+    private final TaskRepository taskRepo;
     private final String FASTAPI_URL = "http://localhost:8000";
 
     // Rolling in-memory store of the last 30 trend points
     private final List<Map<String, Object>> trendHistory = Collections.synchronizedList(new ArrayList<>());
 
-    public AdminAnalyticsController(AdminAnalyticsService analyticsService, RestTemplate restTemplate, Userrepository userRepo) {
+    public AdminAnalyticsController(AdminAnalyticsService analyticsService, RestTemplate restTemplate, Userrepository userRepo, TaskRepository taskRepo) {
         this.analyticsService = analyticsService;
         this.restTemplate = restTemplate;
         this.userRepo = userRepo;
+        this.taskRepo = taskRepo;
     }
 
     // POST /api/admin/track - Spring Boot emits an activity event to River
@@ -162,14 +165,38 @@ public class AdminAnalyticsController {
             List<Map<String, Object>> results = new ArrayList<>();
 
             for (var u : users) {
+                // Compute real daysSinceLogin from lastActiveDate
+                int daysSinceLogin = 30; // default: assume long inactive if no date recorded
+                if (u.getLastActiveDate() != null && !u.getLastActiveDate().isEmpty()) {
+                    try {
+                        java.time.Instant lastActive = java.time.Instant.parse(u.getLastActiveDate());
+                        long diffSeconds = java.time.Instant.now().getEpochSecond() - lastActive.getEpochSecond();
+                        daysSinceLogin = (int)(diffSeconds / 86400);
+                    } catch (Exception ignored) {}
+                }
+
+                // Real task data for burnout detection
+                var userTasks = taskRepo.findByAssigneeId(u.getId());
+                long activeTasks    = userTasks.stream().filter(t -> !"DONE".equals(t.getStatus())).count();
+                long completedTasks = userTasks.stream().filter(t ->  "DONE".equals(t.getStatus())).count();
+                long criticalTasks  = userTasks.stream().filter(t -> "CRITICAL".equals(t.getPriority()) && !"DONE".equals(t.getStatus())).count();
+
+                // Derive engagement signals from inactivity
+                int weeklyLoginCount  = daysSinceLogin == 0 ? 10 : (daysSinceLogin < 3 ? 7 : (daysSinceLogin < 7 ? 3 : (daysSinceLogin < 14 ? 1 : 0)));
+                int tasksCompleted    = (int) completedTasks;
+                int pendingTasks      = (int) activeTasks;
+                int avgSessionMinutes = daysSinceLogin == 0 ? 60 : (daysSinceLogin < 7 ? 30 : (daysSinceLogin < 14 ? 15 : 5));
+
                 Map<String, Object> payload = new HashMap<>();
                 payload.put("userId", u.getId());
                 payload.put("email", u.getEmail());
-                payload.put("daysSinceLogin", 3);         // simplified — real impl would check audit logs
-                payload.put("weeklyLoginCount", 4);
-                payload.put("tasksCompletedLast30Days", 8);
-                payload.put("pendingTasks", 2);
-                payload.put("avgSessionMinutes", 45);
+                payload.put("daysSinceLogin", daysSinceLogin);
+                payload.put("weeklyLoginCount", weeklyLoginCount);
+                payload.put("tasksCompletedLast30Days", tasksCompleted);
+                payload.put("pendingTasks", pendingTasks);
+                payload.put("avgSessionMinutes", avgSessionMinutes);
+                payload.put("activeTasks", (int) activeTasks);
+                payload.put("criticalTasks", (int) criticalTasks);
 
                 try {
                     Map<?,?> churn = restTemplate.postForObject("http://localhost:8000/churn_prediction", payload, Map.class);
@@ -181,15 +208,20 @@ public class AdminAnalyticsController {
                     entry.put("department", u.getDepartment() != null ? u.getDepartment() : "Unknown");
                     entry.put("churnRisk", churn.get("churnRisk"));
                     entry.put("churnScore", churn.get("churnScore"));
+                    entry.put("burnoutRisk", churn.get("burnoutRisk"));
                     entry.put("alert", churn.get("alert"));
                     entry.put("primaryReason", churn.get("primaryReason"));
                     entry.put("recommendation", churn.get("recommendation"));
+                    entry.put("daysSinceLogin", daysSinceLogin);
+                    entry.put("activeTasks", (int) activeTasks);
+                    entry.put("criticalTasks", (int) criticalTasks);
+                    entry.put("lastActiveDate", u.getLastActiveDate() != null ? u.getLastActiveDate() : "Never");
                     results.add(entry);
                 } catch (Exception ignored) {}
             }
 
-            // Sort by churn risk severity
-            Map<String, Integer> riskOrder = Map.of("CRITICAL", 0, "HIGH", 1, "MEDIUM", 2, "LOW", 3);
+            // Sort by churn risk severity: LOW first, CRITICAL last
+            Map<String, Integer> riskOrder = Map.of("LOW", 0, "MEDIUM", 1, "HIGH", 2, "CRITICAL", 3);
             results.sort(Comparator.comparingInt(r -> riskOrder.getOrDefault((String) r.get("churnRisk"), 99)));
 
             return ResponseEntity.ok(results);

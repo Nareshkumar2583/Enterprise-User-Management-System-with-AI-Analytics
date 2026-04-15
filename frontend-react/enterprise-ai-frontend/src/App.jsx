@@ -19,6 +19,9 @@ import AdminHRIntelligence from "./pages/AdminHRIntelligence";
 import TicketRoutingPage from "./pages/TicketRoutingPage";
 import AdminOrgAnalytics from "./pages/AdminOrgAnalytics";
 import AdminProjectIntelligence from "./pages/AdminProjectIntelligence";
+import AdminSupportTicketsPage from "./pages/AdminSupportTicketsPage";
+import AdminSprintPage from "./pages/AdminSprintPage";
+import UserSprintPage from "./pages/UserSprintPage";
 import SidebarLayout from "./layouts/SidebarLayout";
 import { AuthProvider, AuthContext } from "./auth/AuthContext";
 import Register from "./pages/Register";
@@ -92,8 +95,10 @@ export default function App() {
             <Route path="/admin/org-analytics" element={<AdminOrgAnalytics />} />
             <Route path="/admin/project-intelligence" element={<AdminProjectIntelligence />} />
             <Route path="/admin/approvals" element={<ApprovalsPage />} />
+            <Route path="/admin/tickets" element={<AdminSupportTicketsPage />} />
             <Route path="/admin/leave" element={<LeavePage />} />
             <Route path="/admin/ai-assistant" element={<AIAssistantPage />} />
+            <Route path="/admin/scrum" element={<AdminSprintPage />} />
 
             {/* User Routes */}
             <Route path="/user" element={<UserDashboard />} />
@@ -107,6 +112,7 @@ export default function App() {
             <Route path="/user/growth" element={<GrowthInsightsPage />} />
             <Route path="/user/security" element={<SecurityPage />} />
             <Route path="/user/support" element={<TicketRoutingPage />} />
+            <Route path="/user/sprint" element={<UserSprintPage />} />
 
           </Route>
         </Routes>

@@ -170,6 +170,14 @@ public class  UserService {
         repo.save(user);
     }
 
+    // ⏱️ STAMP LAST ACTIVE (called on every login)
+    public void stampLastActive(String id) {
+        repo.findById(id).ifPresent(user -> {
+            user.setLastActiveDate(java.time.Instant.now().toString());
+            repo.save(user);
+        });
+    }
+
     // 🚫 SUSPEND & RESTORE (WAVE 8)
     public void blockUser(String id, boolean blockStatus) {
         User user = repo.findById(id)

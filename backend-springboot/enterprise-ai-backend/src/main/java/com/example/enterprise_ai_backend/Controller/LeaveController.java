@@ -1,7 +1,12 @@
 package com.example.enterprise_ai_backend.Controller;
 
 import com.example.enterprise_ai_backend.model.LeaveRequest;
+import com.example.enterprise_ai_backend.model.Notification;
+import com.example.enterprise_ai_backend.model.User;
 import com.example.enterprise_ai_backend.repository.LeaveRepository;
+import com.example.enterprise_ai_backend.repository.NotificationRepository;
+import com.example.enterprise_ai_backend.repository.Userrepository;
+import com.example.enterprise_ai_backend.Service.EmailService;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +22,15 @@ import java.util.Optional;
 public class LeaveController {
 
     private final LeaveRepository leaveRepo;
+    private final NotificationRepository notifRepo;
+    private final Userrepository userRepo;
+    private final EmailService emailService;
 
-    public LeaveController(LeaveRepository leaveRepo) {
+    public LeaveController(LeaveRepository leaveRepo, NotificationRepository notifRepo, Userrepository userRepo, EmailService emailService) {
         this.leaveRepo = leaveRepo;
+        this.notifRepo = notifRepo;
+        this.userRepo = userRepo;
+        this.emailService = emailService;
     }
 
     // GET all leave requests (admin)
@@ -45,7 +56,17 @@ public class LeaveController {
     public LeaveRequest submitLeave(@RequestBody LeaveRequest req) {
         req.setStatus("PENDING");
         req.setCreatedAt(Instant.now().toString());
-        return leaveRepo.save(req);
+        LeaveRequest saved = leaveRepo.save(req);
+
+        // Notify Admin/HR (Finding an admin user)
+        userRepo.findAll().stream()
+            .filter(u -> "ADMIN".equals(u.getRole()) || "HR".equals(u.getRole()))
+            .findFirst()
+            .ifPresent(admin -> {
+                notifRepo.save(new Notification(admin.getId(), "New Leave Request from User ID: " + req.getUserId(), "ALERT"));
+            });
+
+        return saved;
     }
 
     // GET currently approved leave (availability)
@@ -61,9 +82,20 @@ public class LeaveController {
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
 
         LeaveRequest req = opt.get();
-        req.setStatus(body.getOrDefault("status", "APPROVED"));
+        String newStatus = body.getOrDefault("status", "APPROVED");
+        req.setStatus(newStatus);
         req.setAdminNote(body.getOrDefault("adminNote", ""));
         leaveRepo.save(req);
+
+        // Notify User
+        String msg = "Your leave request for " + req.getStartDate() + " has been " + newStatus;
+        notifRepo.save(new Notification(req.getUserId(), msg, "INFO"));
+
+        // Email User
+        userRepo.findById(req.getUserId()).ifPresent(u -> {
+            emailService.sendLeaveStatusEmail(u.getEmail(), newStatus, req.getStartDate(), req.getEndDate(), req.getAdminNote());
+        });
+
         return ResponseEntity.ok(req);
     }
 }

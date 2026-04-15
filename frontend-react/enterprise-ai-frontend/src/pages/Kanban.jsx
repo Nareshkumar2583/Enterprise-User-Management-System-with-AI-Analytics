@@ -15,6 +15,10 @@ export default function Kanban() {
   const [isAssigning, setIsAssigning] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   
+  // New: Manual Assignment
+  const [users, setUsers] = useState([]);
+  const [manualAssigneeId, setManualAssigneeId] = useState("");
+  
   // WAVE 8: Bulk Management
   const [isBulkMode, setIsBulkMode] = useState(false);
   const [selectedBulkTasks, setSelectedBulkTasks] = useState(new Set());
@@ -23,7 +27,19 @@ export default function Kanban() {
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+    if (isAdmin) {
+      fetchUsers();
+    }
+  }, [isAdmin]);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await api.get("/api/admin/users");
+      setUsers(res.data);
+    } catch (err) {
+      console.error("Failed to load users", err);
+    }
+  };
 
   const fetchTasks = async () => {
     try {
@@ -120,18 +136,32 @@ export default function Kanban() {
     } else {
       // Manual/Standard creation without AI
       try {
+        const selectedUser = users.find(u => u.id === manualAssigneeId);
         const taskData = {
           title: newTaskTitle,
           status: "TODO",
-          assigneeId: isAdmin ? null : user.id, // Users auto-assign to themselves
-          assigneeEmail: isAdmin ? null : user.email
+          assigneeId: isAdmin ? (selectedUser ? selectedUser.id : null) : user.id,
+          assigneeEmail: isAdmin ? (selectedUser ? selectedUser.email : null) : user.email
         };
         const res = await api.post("/api/tasks", taskData);
         setTasks([...tasks, res.data]);
         setNewTaskTitle("");
+        setManualAssigneeId("");
       } catch (err) {
         console.error(err);
       }
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    if (!window.confirm("Are you sure you want to delete this task? This action cannot be undone.")) return;
+    try {
+      await api.delete(`/api/tasks/${taskId}`);
+      setTasks(prev => prev.filter(t => t.id !== taskId));
+      if (selectedTask?.id === taskId) setSelectedTask(null);
+    } catch (err) {
+      console.error("Failed to delete task", err);
+      alert("Failed to delete task");
     }
   };
 
@@ -152,15 +182,30 @@ export default function Kanban() {
             disabled={isAssigning}
           />
           {isAdmin && (
-            <label className="ai-checkbox">
-              <input 
-                type="checkbox" 
-                checked={useAi} 
-                onChange={e => setUseAi(e.target.checked)} 
-                disabled={isAssigning}
-              />
-              ✨ AI Scrum Master (Auto-Assign)
-            </label>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <label className="ai-checkbox">
+                <input 
+                  type="checkbox" 
+                  checked={useAi} 
+                  onChange={e => setUseAi(e.target.checked)} 
+                  disabled={isAssigning}
+                />
+                ✨ AI Scrum Master
+              </label>
+
+              {!useAi && (
+                <select 
+                  value={manualAssigneeId} 
+                  onChange={e => setManualAssigneeId(e.target.value)}
+                  style={{ padding: "6px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "12px" }}
+                >
+                  <option value="">Assign To (Optional)</option>
+                  {users.map(u => (
+                    <option key={u.id} value={u.id}>{u.name || u.email}</option>
+                  ))}
+                </select>
+              )}
+            </div>
           )}
           <button type="submit" disabled={isAssigning || !newTaskTitle.trim()}>
             {isAssigning ? "🤖 AI Thinking..." : "Add Task"}
@@ -230,15 +275,28 @@ export default function Kanban() {
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
                       <p className="task-title" style={{ margin: 0, flex: 1 }}>{task.title}</p>
-                      {task.priority && (
-                        <span style={{ 
-                          fontSize: "10px", fontWeight: "bold", padding: "2px 6px", borderRadius: "10px", 
-                          background: task.priority === "CRITICAL" ? "#fee2e2" : "#f1f5f9", 
-                          color: task.priority === "CRITICAL" ? "#ef4444" : "#64748b" 
-                        }}>
-                          {task.priority}
-                        </span>
-                      )}
+                      <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                        {isAdmin && (
+                          <button 
+                            className="task-delete-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteTask(task.id);
+                            }}
+                          >
+                            ×
+                          </button>
+                        )}
+                        {task.priority && (
+                          <span style={{ 
+                            fontSize: "10px", fontWeight: "bold", padding: "2px 6px", borderRadius: "10px", 
+                            background: task.priority === "CRITICAL" ? "#fee2e2" : "#f1f5f9", 
+                            color: task.priority === "CRITICAL" ? "#ef4444" : "#64748b" 
+                          }}>
+                            {task.priority}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     
                     {task.assigneeEmail && (
@@ -273,6 +331,7 @@ export default function Kanban() {
         <TaskDetailsModal 
           task={selectedTask}
           onClose={() => setSelectedTask(null)}
+          onDelete={handleDeleteTask}
           onUpdate={(updatedTask) => {
             setTasks(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));
             setSelectedTask(updatedTask);

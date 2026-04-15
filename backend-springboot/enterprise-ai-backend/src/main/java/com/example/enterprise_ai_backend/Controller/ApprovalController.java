@@ -1,7 +1,10 @@
 package com.example.enterprise_ai_backend.Controller;
 
 import com.example.enterprise_ai_backend.model.ApprovalRequest;
+import com.example.enterprise_ai_backend.model.Notification;
 import com.example.enterprise_ai_backend.repository.ApprovalRepository;
+import com.example.enterprise_ai_backend.repository.NotificationRepository;
+import com.example.enterprise_ai_backend.repository.Userrepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +20,13 @@ import java.util.Optional;
 public class ApprovalController {
 
     private final ApprovalRepository approvalRepo;
+    private final NotificationRepository notifRepo;
+    private final Userrepository userRepo;
 
-    public ApprovalController(ApprovalRepository approvalRepo) {
+    public ApprovalController(ApprovalRepository approvalRepo, NotificationRepository notifRepo, Userrepository userRepo) {
         this.approvalRepo = approvalRepo;
+        this.notifRepo = notifRepo;
+        this.userRepo = userRepo;
     }
 
     // GET all approvals (admin)
@@ -45,7 +52,17 @@ public class ApprovalController {
     public ApprovalRequest submit(@RequestBody ApprovalRequest req) {
         req.setStatus("PENDING");
         req.setCreatedAt(Instant.now().toString());
-        return approvalRepo.save(req);
+        ApprovalRequest saved = approvalRepo.save(req);
+
+        // Notify Admin
+        userRepo.findAll().stream()
+            .filter(u -> "ADMIN".equals(u.getRole()))
+            .findFirst()
+            .ifPresent(admin -> {
+                notifRepo.save(new Notification(admin.getId(), "New Approval Request: " + req.getType(), "ALERT"));
+            });
+
+        return saved;
     }
 
     // PUT admin decision: approve or reject
@@ -55,10 +72,15 @@ public class ApprovalController {
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
 
         ApprovalRequest req = opt.get();
-        req.setStatus(body.getOrDefault("status", "APPROVED"));
+        String newStatus = body.getOrDefault("status", "APPROVED");
+        req.setStatus(newStatus);
         req.setAdminNote(body.getOrDefault("adminNote", ""));
         req.setResolvedAt(Instant.now().toString());
         approvalRepo.save(req);
+
+        // Notify Requester
+        notifRepo.save(new Notification(req.getRequesterId(), "Your request '" + req.getType() + "' was " + newStatus, "INFO"));
+
         return ResponseEntity.ok(req);
     }
 }

@@ -44,8 +44,8 @@ df['is_anomaly'] = iso_forest.fit_predict(X_scaled)
 
 # 4. Train Churn Prediction (Logistic Regression)
 print("Training Churn Prediction Model (Logistic Regression)...")
-# Synthetic Target: high days since login + low frequency = high churn
-churn_target = ((df['days_since_last_login'] > 5) | (df['login_frequency'] < 10)).astype(int)
+# Synthetic Target: high days since login OR low frequency = churn (balanced for training)
+churn_target = ((df['days_since_last_login'] > 10) | (df['login_frequency'] < 8)).astype(int)
 log_reg = LogisticRegression(random_state=42)
 log_reg.fit(X_scaled, churn_target)
 

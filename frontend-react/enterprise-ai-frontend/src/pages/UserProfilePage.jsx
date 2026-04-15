@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../auth/AuthContext";
 import api from "../api/axios";
+import "../styles/profile.css";
 
 export default function UserProfilePage() {
   const { user } = useContext(AuthContext);
@@ -8,7 +9,7 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
-  // Form stats
+  // Form state
   const [email, setEmail] = useState("");
   const [department, setDepartment] = useState("");
   const [phone, setPhone] = useState("");
@@ -46,7 +47,6 @@ export default function UserProfilePage() {
   const fetchSecurityLogs = async () => {
     try {
       const res = await api.get(`/api/audit/user/${user.id}`);
-      // Filter for login/security related events if desired, or just show all
       setSecurityLogs(res.data.slice(0, 5));
     } catch (e) {
       console.error(e);
@@ -84,142 +84,138 @@ export default function UserProfilePage() {
     setSkills(skills.filter(s => s !== skillToRemove));
   };
 
-  if (loading) return <div style={{ padding: 40 }}>Loading profile...</div>;
-  if (!profile) return <div style={{ padding: 40 }}>Failed to load profile.</div>;
+  if (loading) return <div className="profile-loading">Loading profile...</div>;
+  if (!profile) return <div className="profile-loading">Failed to load profile.</div>;
 
   return (
-    <div style={{ padding: "30px", display: "flex", flexDirection: "column", gap: "24px", maxWidth: "1200px", margin: "0 auto" }}>
+    <div className="profile-page">
       
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+      {/* Page Header */}
+      <div className="profile-page-header">
         <div>
-          <h2 style={{ margin: 0, color: "#1e293b", fontSize: "24px" }}>My Profile</h2>
-          <p style={{ margin: "4px 0 0", color: "#64748b", fontSize: "14px" }}>Manage your personal details, skills, and secure your account.</p>
+          <h2 className="profile-page-title">My Profile</h2>
+          <p className="profile-page-subtitle">Manage your personal details, skills, and secure your account.</p>
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px" }}>
+      {/* Two-column Grid (stacks on mobile) */}
+      <div className="profile-grid">
         
         {/* Left Column: Edit Profile */}
-        <div style={{ background: "white", borderRadius: "12px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "24px" }}>
-            <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: "#e2e8f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "32px" }}>
-              👤
-            </div>
+        <div className="profile-card">
+          <div className="profile-identity">
+            <div className="profile-avatar">👤</div>
             <div>
-              <h3 style={{ margin: 0, fontSize: "18px", color: "#1e293b" }}>{profile.name}</h3>
-              <p style={{ margin: "4px 0 0", color: "#64748b" }}>Edit your personal details below.</p>
-              <span style={{ display: "inline-block", marginTop: "8px", background: "#f1f5f9", padding: "4px 12px", borderRadius: "20px", fontSize: "11px", fontWeight: "bold", color: "#475569" }}>
-                Role: {profile.role}
-              </span>
+              <h3 className="profile-name">{profile.name}</h3>
+              <p className="profile-sub">Edit your personal details below.</p>
+              <span className="profile-role-badge">Role: {profile.role}</span>
             </div>
           </div>
 
-          <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <form onSubmit={handleSave} className="profile-form">
             
-            <div>
-              <label style={{ display: "block", fontSize: "13px", color: "#475569", fontWeight: "bold", marginBottom: "6px" }}>Email Address</label>
+            <div className="form-group">
+              <label className="form-label">Email Address</label>
               <input 
                 type="email" value={email} onChange={e => setEmail(e.target.value)}
                 placeholder="your.email@example.com"
-                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                className="form-input"
                 required
               />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-              <div>
-                <label style={{ display: "block", fontSize: "13px", color: "#475569", fontWeight: "bold", marginBottom: "6px" }}>Department</label>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Department</label>
                 <input 
                   type="text" value={department} onChange={e => setDepartment(e.target.value)}
                   placeholder="e.g. Engineering, Sales..."
-                  style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                  className="form-input"
                 />
               </div>
-              <div>
-                <label style={{ display: "block", fontSize: "13px", color: "#475569", fontWeight: "bold", marginBottom: "6px" }}>Phone Number</label>
+              <div className="form-group">
+                <label className="form-label">Phone Number</label>
                 <input 
                   type="tel" value={phone} onChange={e => setPhone(e.target.value)}
                   placeholder="+1 (555) 000-0000"
-                  style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                  className="form-input"
                 />
               </div>
             </div>
 
-            <div>
-              <label style={{ display: "block", fontSize: "13px", color: "#475569", fontWeight: "bold", marginBottom: "6px" }}>Bio</label>
+            <div className="form-group">
+              <label className="form-label">Bio</label>
               <textarea 
                 value={bio} onChange={e => setBio(e.target.value)}
                 placeholder="A short description about your role and expertise..."
                 rows={3}
-                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1", resize: "vertical" }}
+                className="form-input form-textarea"
               />
             </div>
 
-            <div>
-              <label style={{ display: "block", fontSize: "13px", color: "#475569", fontWeight: "bold", marginBottom: "6px" }}>Skills & Capabilities</label>
-              <div style={{ display: "flex", gap: "8px", marginBottom: "10px" }}>
+            <div className="form-group">
+              <label className="form-label">Skills &amp; Capabilities</label>
+              <div className="skill-input-row">
                 <input 
                   type="text" value={skillInput} onChange={e => setSkillInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addSkill())}
                   placeholder="Add a skill (e.g. React, Java, Management)"
-                  style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                  className="form-input"
                 />
-                <button type="button" onClick={addSkill} style={{ background: "#f1f5f9", border: "1px solid #cbd5e1", borderRadius: "8px", padding: "0 16px", fontWeight: "bold", cursor: "pointer", color: "#475569" }}>
+                <button type="button" onClick={addSkill} className="skill-add-btn">
                   Add
                 </button>
               </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              <div className="skill-tags">
                 {skills.map(s => (
-                  <div key={s} style={{ background: "#e0e7ff", color: "#3730a3", padding: "4px 12px", borderRadius: "20px", fontSize: "13px", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <div key={s} className="skill-tag">
                     {s}
-                    <button type="button" onClick={() => removeSkill(s)} style={{ background: "transparent", border: "none", color: "#3730a3", cursor: "pointer", padding: 0, fontWeight: "bold", fontSize: "14px" }}>
-                      ×
-                    </button>
+                    <button type="button" onClick={() => removeSkill(s)} className="skill-remove-btn">×</button>
                   </div>
                 ))}
               </div>
             </div>
 
-            <button type="submit" disabled={saving} style={{ background: "#4f46e5", color: "white", border: "none", padding: "12px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold", marginTop: "10px" }}>
+            <button type="submit" disabled={saving} className="profile-save-btn">
               {saving ? "Saving..." : "Save Profile Details"}
             </button>
           </form>
         </div>
 
-        {/* Right Column: Security & Metadata */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        {/* Right Column: Security & Activity */}
+        <div className="profile-right-col">
           
-          <div style={{ background: "white", borderRadius: "12px", padding: "20px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderTop: "4px solid #16a34a" }}>
-            <h3 style={{ margin: "0 0 16px", fontSize: "16px", color: "#1e293b", display: "flex", alignItems: "center", gap: "8px" }}>
+          {/* Security Status */}
+          <div className="profile-card profile-security-card">
+            <h3 className="profile-card-title">
               <span>🔐</span> Security Status
             </h3>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", paddingBottom: "12px", borderBottom: "1px solid #e2e8f0" }}>
-              <span style={{ fontSize: "13px", color: "#64748b" }}>Account Risk:</span>
-              <span style={{ background: profile.riskLevel === 'HIGH' ? '#fee2e2' : '#dcfce7', color: profile.riskLevel === 'HIGH' ? '#dc2626' : '#16a34a', padding: "2px 8px", borderRadius: "4px", fontSize: "12px", fontWeight: "bold" }}>
+            <div className="security-row">
+              <span className="security-label">Account Risk:</span>
+              <span className={`risk-badge ${profile.riskLevel === 'HIGH' ? 'risk-high' : 'risk-low'}`}>
                 {profile.riskLevel || "LOW"}
               </span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", paddingBottom: "12px", borderBottom: "1px solid #e2e8f0" }}>
-              <span style={{ fontSize: "13px", color: "#64748b" }}>2FA Status:</span>
-              <span style={{ color: "#ef4444", fontWeight: "bold", fontSize: "13px" }}>Disabled</span>
+            <div className="security-row">
+              <span className="security-label">2FA Status:</span>
+              <span className="twofa-disabled">Disabled</span>
             </div>
-            <button style={{ background: "transparent", border: "1px solid #cbd5e1", borderRadius: "6px", width: "100%", padding: "8px", cursor: "pointer", fontWeight: "500", color: "#475569" }}>
-              Change Password
-            </button>
+            <button className="change-password-btn">Change Password</button>
           </div>
 
-          <div style={{ background: "white", borderRadius: "12px", padding: "20px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-            <h3 style={{ margin: "0 0 16px", fontSize: "16px", color: "#1e293b", display: "flex", alignItems: "center", gap: "8px" }}>
+          {/* Recent Activity */}
+          <div className="profile-card">
+            <h3 className="profile-card-title">
               <span>🕒</span> Recent Activity
             </h3>
             {securityLogs.length === 0 ? (
-              <p style={{ fontSize: "13px", color: "#64748b", margin: 0 }}>No recent activity.</p>
+              <p className="no-activity">No recent activity.</p>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div className="activity-list">
                 {securityLogs.map(log => (
-                  <div key={log.id} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                    <div style={{ fontSize: "13px", fontWeight: "500", color: "#334155" }}>{log.action}</div>
-                    <div style={{ fontSize: "11px", color: "#94a3b8", display: "flex", justifyContent: "space-between" }}>
+                  <div key={log.id} className="activity-item">
+                    <div className="activity-action">{log.action}</div>
+                    <div className="activity-meta">
                       <span>{log.details.length > 30 ? log.details.substring(0, 30) + "..." : log.details}</span>
                       <span>{new Date(log.timestamp).toLocaleDateString()}</span>
                     </div>
@@ -230,7 +226,6 @@ export default function UserProfilePage() {
           </div>
 
         </div>
-
       </div>
     </div>
   );

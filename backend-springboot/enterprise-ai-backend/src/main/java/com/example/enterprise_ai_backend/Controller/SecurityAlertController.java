@@ -5,6 +5,8 @@ import com.example.enterprise_ai_backend.repository.NotificationRepository;
 import com.example.enterprise_ai_backend.repository.Userrepository;
 import com.example.enterprise_ai_backend.repository.AuditRepository;
 import com.example.enterprise_ai_backend.model.User;
+import com.example.enterprise_ai_backend.model.SupportTicket;
+import com.example.enterprise_ai_backend.repository.SupportTicketRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,16 +24,19 @@ public class SecurityAlertController {
     private final Userrepository userRepo;
     private final AuditRepository auditRepo;
     private final NotificationRepository notifRepo;
+    private final SupportTicketRepository ticketRepo;
     private final PasswordEncoder passwordEncoder;
     private final RestTemplate restTemplate;
     private final String FASTAPI_URL = "http://localhost:8000";
 
     public SecurityAlertController(Userrepository userRepo, AuditRepository auditRepo,
-                                   NotificationRepository notifRepo, PasswordEncoder passwordEncoder,
+                                   NotificationRepository notifRepo, SupportTicketRepository ticketRepo,
+                                   PasswordEncoder passwordEncoder,
                                    RestTemplate restTemplate) {
         this.userRepo = userRepo;
         this.auditRepo = auditRepo;
         this.notifRepo = notifRepo;
+        this.ticketRepo = ticketRepo;
         this.passwordEncoder = passwordEncoder;
         this.restTemplate = restTemplate;
     }
@@ -129,8 +134,36 @@ public class SecurityAlertController {
     @PostMapping("/smart-ticket")
     public ResponseEntity<?> smartTicket(@RequestBody Map<String, Object> body, Authentication auth) {
         try {
-            if (auth != null) body.put("userEmail", auth.getName());
+            String userEmail = auth != null ? auth.getName() : "anonymous@user.com";
+            body.put("userEmail", userEmail);
+            
             Map<?,?> result = restTemplate.postForObject(FASTAPI_URL + "/smart_ticket", body, Map.class);
+            
+            // ✅ Persist ticket to Database
+            if (result != null) {
+                SupportTicket ticket = new SupportTicket();
+                ticket.setUserEmail(userEmail);
+                ticket.setSubject((String) body.get("subject"));
+                ticket.setBody((String) body.get("body"));
+                ticket.setTicketId((String) result.get("ticketId"));
+                ticket.setDepartment((String) result.get("department"));
+                ticket.setPriority((String) result.get("priority"));
+                ticket.setSentiment((String) result.get("sentiment"));
+                ticket.setUrgencyScore(result.get("urgencyScore") instanceof Number ? ((Number) result.get("urgencyScore")).doubleValue() : 0.0);
+                ticket.setSuggestedAction((String) result.get("suggestedAction"));
+                ticket.setEstimatedResolutionHours(result.get("estimatedResolutionHours") instanceof Number ? ((Number) result.get("estimatedResolutionHours")).intValue() : 0);
+                
+                ticketRepo.save(ticket);
+                
+                // 🔔 Notify Admins
+                String alertMsg = "New Smart Ticket Raised by " + userEmail + ": [" + ticket.getPriority() + "] " + ticket.getSubject();
+                userRepo.findAll().stream()
+                    .filter(u -> "ADMIN".equals(u.getRole()))
+                    .forEach(admin -> {
+                        notifRepo.save(new Notification(admin.getId(), alertMsg, "INFO"));
+                    });
+            }
+            
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

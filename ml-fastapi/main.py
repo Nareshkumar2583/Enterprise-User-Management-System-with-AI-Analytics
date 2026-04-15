@@ -51,11 +51,11 @@ def generate_ml_features(user: UserRequest) -> MLResponse:
     
     # Simulate DB metrics extraction
     is_admin = 1 if user.role == "ADMIN" else 0
-    login_freq = (hash_val % 30) + 1
-    session_dur = (hash_val % 100) + 5
-    failed_logins = (hash_val % 5)
-    api_calls = (hash_val % 1000)
-    days_since_login = (hash_val % 20)
+    login_freq = (hash_val % 25) + 5   # 5 to 30
+    session_dur = (hash_val % 120) + 10 # 10 to 130 mins
+    failed_logins = (hash_val % 4)
+    api_calls = (hash_val % 1200)
+    days_since_login = (hash_val % 30) # 0 to 29 days
 
     # Create inference DataFrame
     df_infer = pd.DataFrame([{
@@ -73,7 +73,21 @@ def generate_ml_features(user: UserRequest) -> MLResponse:
     # 2. Risk Score (Random Forest Regression)
     raw_risk = risk_model.predict(X_scaled)[0]
     risk_score = int(np.clip(raw_risk, 0, 100))
-    
+
+    # 4. Churn Prediction (Logistic Regression) — computed here so it can influence risk_score
+    churn_prob_arr = churn_model.predict_proba(X_scaled)
+    # probability of class 1 (churn)
+    if churn_prob_arr.shape[1] > 1:
+        churn_prob = int(churn_prob_arr[0][1] * 100)
+    else:
+        churn_prob = 0
+
+    # Synchronize: if churn risk is very high, elevate the risk score to match
+    if churn_prob >= 90 and risk_score < 70:
+        risk_score = max(risk_score, random.randint(75, 92))
+    elif churn_prob >= 60 and risk_score < 40:
+        risk_score = max(risk_score, random.randint(45, 65))
+
     if risk_score > 75:
         risk_level = "HIGH"
     elif risk_score > 40:
@@ -86,13 +100,7 @@ def generate_ml_features(user: UserRequest) -> MLResponse:
     anomaly_pred = iso_forest.predict(X_scaled)[0]
     suspicious = bool(anomaly_pred == -1)
 
-    # 4. Churn Prediction (Logistic Regression)
-    churn_prob_arr = churn_model.predict_proba(X_scaled)
-    # probability of class 1 (churn)
-    if churn_prob_arr.shape[1] > 1:
-        churn_prob = int(churn_prob_arr[0][1] * 100)
-    else:
-        churn_prob = 0
+    # (Churn prediction already computed above alongside risk_score)
 
     # 5. Segment (K-Means Clustering)
     cluster_mapping = {
@@ -163,11 +171,12 @@ def analyze_batch_users(request: BatchUserRequest):
 # --- STREAMING AI WITH RIVER ---
 from river import anomaly
 
-# Initialize a Half-Space Trees model for streaming anomaly detection
+# Initialize a HalfSpaceTrees model for streaming anomaly detection
+# Reduced window_size from 250 to 20 for faster demo warming
 stream_model = anomaly.HalfSpaceTrees(
     n_trees=25,
     height=8,
-    window_size=250,
+    window_size=20,
     seed=42
 )
 
@@ -190,11 +199,15 @@ def track_activity(event: ActivityEvent):
     # 1. Score first (inference)
     score = stream_model.score_one(features)
     
+    # Ensure background noise for UX (never exactly 0 if duration > 0)
+    if score == 0.0 and event.duration > 0:
+        score = random.uniform(0.01, 0.05)
+    
     # 2. Update model (learning)
     stream_model.learn_one(features)
     
     return StreamResponse(
-        anomaly_score=score,
+        anomaly_score=round(float(score), 4),
         is_anomaly=score > 0.70
     )
 
@@ -1197,7 +1210,7 @@ def login_anomaly(req: LoginAnomalyRequest):
     )
 
 
-# ── B10. Churn / Disengagement Prediction ───────────────────────────────────────
+# ── B10. Churn / Disengagement + Burnout Prediction ────────────────────────────
 class ChurnRequest(BaseModel):
     userId: str
     email: str
@@ -1206,10 +1219,13 @@ class ChurnRequest(BaseModel):
     tasksCompletedLast30Days: int = 10
     pendingTasks: int = 0
     avgSessionMinutes: int = 60
+    activeTasks: int = 0       # NEW: real active task count
+    criticalTasks: int = 0     # NEW: real critical task count
 
 class ChurnResponse(BaseModel):
-    churnRisk: str   # LOW | MEDIUM | HIGH | CRITICAL
+    churnRisk: str         # LOW | MEDIUM | HIGH | CRITICAL
     churnScore: float
+    burnoutRisk: str       # LOW | MEDIUM | HIGH  (from task overload)
     alert: str
     primaryReason: str
     recommendation: str
@@ -1219,6 +1235,7 @@ def churn_prediction(req: ChurnRequest):
     score = 0.0
     reasons = []
 
+    # ── Disengagement signals ──────────────────────────────────────────────────
     if req.daysSinceLogin > 14:
         score += 0.40
         reasons.append(f"Not logged in for {req.daysSinceLogin} days")
@@ -1246,26 +1263,69 @@ def churn_prediction(req: ChurnRequest):
 
     score = round(min(score, 1.0), 2)
 
+    # ── Burnout signals (from real task overload) ──────────────────────────────
+    burnout_score = 0.0
+    burnout_reasons = []
+
+    if req.activeTasks >= 8:
+        burnout_score += 0.6
+        burnout_reasons.append(f"Critically overloaded with {req.activeTasks} active tasks")
+    elif req.activeTasks >= 5:
+        burnout_score += 0.35
+        burnout_reasons.append(f"Heavy workload: {req.activeTasks} active tasks")
+    elif req.activeTasks >= 3:
+        burnout_score += 0.15
+        burnout_reasons.append(f"{req.activeTasks} tasks in progress")
+
+    if req.criticalTasks >= 2:
+        burnout_score += 0.4
+        burnout_reasons.append(f"{req.criticalTasks} CRITICAL priority tasks pending")
+    elif req.criticalTasks == 1:
+        burnout_score += 0.2
+        burnout_reasons.append("1 CRITICAL priority task pending")
+
+    burnout_score = round(min(burnout_score, 1.0), 2)
+
+    if burnout_score >= 0.6:
+        burnout_risk = "HIGH"
+        if burnout_reasons:
+            reasons.insert(0, "BURNOUT: " + burnout_reasons[0])
+    elif burnout_score >= 0.3:
+        burnout_risk = "MEDIUM"
+        if burnout_reasons:
+            reasons.insert(0, "BURNOUT RISK: " + burnout_reasons[0])
+    else:
+        burnout_risk = "LOW"
+
+    # ── Alert & Recommendation ─────────────────────────────────────────────────
+    name = req.email.split('@')[0]
+
     if score >= 0.75:
         risk = "CRITICAL"
-        alert = f"⚠️ CRITICAL: {req.email.split('@')[0]} is at severe risk of disengagement. Immediate manager intervention required."
+        alert = f"⚠️ CRITICAL: {name} is at severe risk of disengagement. Immediate manager intervention required."
         rec = "Schedule a 1-on-1 check-in with this employee today"
     elif score >= 0.50:
         risk = "HIGH"
-        alert = f"🔶 HIGH RISK: {req.email.split('@')[0]} shows strong disengagement signals."
+        alert = f"🔶 HIGH RISK: {name} shows strong disengagement signals."
         rec = "Assign motivating tasks and send a personalized nudge"
     elif score >= 0.25:
         risk = "MEDIUM"
-        alert = f"🔔 MEDIUM: {req.email.split('@')[0]} engagement is declining."
+        alert = f"🔔 MEDIUM: {name} engagement is declining."
         rec = "Monitor for the next 7 days and offer support resources"
     else:
         risk = "LOW"
         alert = ""
         rec = "No action required — employee is engaged"
 
+    # If burnout is HIGH, escalate the overall alert
+    if burnout_risk == "HIGH" and risk == "LOW":
+        alert = f"🔥 BURNOUT RISK: {name} is overloaded with tasks. At risk of burnout despite active login."
+        rec = "Redistribute tasks immediately and discuss with manager"
+
     return ChurnResponse(
         churnRisk=risk,
         churnScore=score,
+        burnoutRisk=burnout_risk,
         alert=alert,
         primaryReason=reasons[0] if reasons else "Healthy engagement pattern",
         recommendation=rec
@@ -1506,6 +1566,74 @@ def workload_heatmap(req: WorkloadHeatmapRequest):
         })
     
     return {"heatmap": heatmap}
+
+
+# ── Scrum / Sprint AI Analysis ────────────────────────────────────────────────
+class SprintTaskInfo(BaseModel):
+    id: str
+    status: str
+    storyPoints: int
+    assigneeEmail: str = ""
+
+class ScrumAIRequest(BaseModel):
+    sprintName: str
+    daysLeft: int
+    tasks: List[SprintTaskInfo]
+
+class ScrumAIResponse(BaseModel):
+    delayRisk: str # LOW | MEDIUM | HIGH
+    completionForecast: int # 0-100 percentage
+    overloadedUsers: List[str]
+    reallocationSuggestion: str
+    velocityTrend: str # stable | improving | declining
+    summary: str
+
+@app.post("/sprint_ai_analysis", response_model=ScrumAIResponse)
+def sprint_ai_analysis(req: ScrumAIRequest):
+    total_pts = sum([t.storyPoints for t in req.tasks])
+    done_pts = sum([t.storyPoints for t in req.tasks if t.status == "DONE"])
+    
+    if total_pts == 0:
+        return ScrumAIResponse(
+            delayRisk="LOW", completionForecast=100, overloadedUsers=[],
+            reallocationSuggestion="Backlog is empty.", velocityTrend="stable",
+            summary="No tasks in current sprint."
+        )
+
+    completion_rate = (done_pts / total_pts) * 100
+    pts_left = total_pts - done_pts
+    
+    # Simple risk heuristic
+    risk = "LOW"
+    if req.daysLeft < 3 and completion_rate < 50:
+        risk = "HIGH"
+    elif req.daysLeft < 5 and completion_rate < 70:
+        risk = "MEDIUM"
+        
+    # Overload detection
+    workloads = {}
+    for t in req.tasks:
+        if t.status != "DONE":
+            workloads[t.assigneeEmail] = workloads.get(t.assigneeEmail, 0) + t.storyPoints
+            
+    overloaded = [email for email, pts in workloads.items() if pts > 8 and email != ""]
+    
+    suggestion = "Workload looks balanced."
+    if overloaded:
+        suggestion = f"Consider moving some tasks from {', '.join(overloaded[:2])} to less loaded members."
+        
+    summary = f"The sprint is {int(completion_rate)}% complete with {req.daysLeft} days remaining. "
+    if risk == "HIGH":
+        summary += "Urgent action needed to meet the sprint goal."
+        
+    return ScrumAIResponse(
+        delayRisk=risk,
+        completionForecast=int(completion_rate),
+        overloadedUsers=overloaded,
+        reallocationSuggestion=suggestion,
+        velocityTrend="stable",
+        summary=summary
+    )
 
 
 if __name__ == "__main__":

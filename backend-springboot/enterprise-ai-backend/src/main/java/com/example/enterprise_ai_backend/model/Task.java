@@ -32,6 +32,10 @@ public class Task {
     private Integer estimatedHours;
     private String delayRisk;
     private String priority;
+
+    // Scrum / Sprint fields
+    private String sprintId;       // null = backlog, set = belongs to this sprint
+    private Integer storyPoints = 1; // for burndown chart
     
     public Task() {}
 
@@ -88,4 +92,10 @@ public class Task {
     
     public java.util.List<java.util.Map<String, String>> getProgressHistory() { return progressHistory; }
     public void setProgressHistory(java.util.List<java.util.Map<String, String>> progressHistory) { this.progressHistory = progressHistory; }
+
+    public String getSprintId() { return sprintId; }
+    public void setSprintId(String sprintId) { this.sprintId = sprintId; }
+
+    public Integer getStoryPoints() { return storyPoints; }
+    public void setStoryPoints(Integer storyPoints) { this.storyPoints = storyPoints; }
 }
