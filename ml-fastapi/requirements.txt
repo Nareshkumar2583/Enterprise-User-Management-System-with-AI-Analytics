@@ -5,4 +5,3 @@ scikit-learn==1.4.2
 pandas==2.2.2
 joblib==1.4.2
 numpy==1.26.4
-river==0.21.2
