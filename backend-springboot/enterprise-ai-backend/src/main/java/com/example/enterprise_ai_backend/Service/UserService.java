@@ -16,7 +16,7 @@ public class  UserService {
     private final PasswordEncoder passwordEncoder;
 
     private final RestTemplate restTemplate;
-    private final String FASTAPI_URL = "http://localhost:8000";
+    private final String FASTAPI_URL = "https://enterprise-user-management-system-with.onrender.com";
 
     public UserService(Userrepository repo,
                        PasswordEncoder passwordEncoder,
