@@ -23,35 +23,32 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {}) // allow frontend
+                .cors(cors -> {}) // allow frontend requests
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
 
-                        // Allow preflight requests (VERY IMPORTANT for React)
+                        // ✅ Allow public endpoints (VERY IMPORTANT)
+                        .requestMatchers("/", "/api", "/api/test").permitAll()
+
+                        // ✅ Allow preflight (React / frontend)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Public endpoints
+                        // ✅ Auth endpoints (login/register)
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // Document uploads/downloads — authenticated users only
+                        // 🔐 Protected endpoints
                         .requestMatchers("/api/documents/**").authenticated()
-
-                        // Notifications — authenticated users only
                         .requestMatchers("/api/notifications/**").authenticated()
-
-                        // Admin only
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                        // User endpoints — accessible by both USER and ADMIN
                         .requestMatchers("/api/user/**").authenticated()
-
-                        // Tasks and audit — any authenticated user
                         .requestMatchers("/api/tasks/**").authenticated()
                         .requestMatchers("/api/audit/**").authenticated()
 
-                        // Everything else
+                        // 🔐 Admin only
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // 🔐 Everything else requires login
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
